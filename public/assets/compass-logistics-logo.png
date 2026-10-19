@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" width="300" height="200">
+  <defs>
+    <!-- Dark green background with subtle radial depth like the uploaded photo -->
+    <radialGradient id="compassBg" cx="45%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#00582b" />
+      <stop offset="70%" stop-color="#004622" />
+      <stop offset="100%" stop-color="#00381b" />
+    </radialGradient>
+  </defs>
+
+  <!-- Base Rectangle with rounded corners -->
+  <rect width="300" height="200" rx="12" fill="url(#compassBg)" />
+
+  <!-- Abstract 4-Feather Lime Wing Emblem -->
+  <!-- Base point converges at approximately (158, 118) -->
+  <g fill="#c9db12">
+    <!-- Feather 1 (leftmost) -->
+    <path d="M 148,118 C 141,104 134,80 136,58 C 137,45 147,44 151,53 C 156,64 158,88 159,118 Z" />
+
+    <!-- Feather 2 -->
+    <path d="M 160,118 C 159,96 162,68 174,40 C 180,26 193,28 193,42 C 193,58 183,90 174,118 Z" />
+
+    <!-- Feather 3 -->
+    <path d="M 176,118 C 182,90 197,55 220,29 C 229,18 243,23 240,38 C 236,54 213,88 194,118 Z" />
+
+    <!-- Feather 4 (Sweeping long wing with downward swooping tail) -->
+    <path d="M 196,118 C 215,90 248,50 274,38 C 285,32 291,38 285,48 C 274,65 264,80 293,98 C 298,101 297,105 290,105 C 270,105 240,102 216,118 Z" />
+  </g>
+
+  <!-- Typography -->
+  <!-- COMPASS in bold modern sans-serif -->
+  <text 
+    x="150" 
+    y="152" 
+    text-anchor="middle" 
+    font-family="system-ui, -apple-system, 'Plus Jakarta Sans', Montserrat, Arial, sans-serif" 
+    font-size="38" 
+    font-weight="900" 
+    letter-spacing="2" 
+    fill="#FFFFFF"
+  >COMPASS</text>
+
+  <!-- LOGISTICS INTERNATIONAL -->
+  <text 
+    x="150" 
+    y="172" 
+    text-anchor="middle" 
+    font-family="system-ui, -apple-system, 'Plus Jakarta Sans', Montserrat, Arial, sans-serif" 
+    font-size="9.5" 
+    font-weight="700" 
+    letter-spacing="4.2" 
+    fill="#FFFFFF"
+  >LOGISTICS INTERNATIONAL</text>
+</svg>
