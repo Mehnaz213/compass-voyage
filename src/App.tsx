@@ -1,241 +1,228 @@
-import React, { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { Navbar } from './components/Navbar';
-import { Sidebar, type NavTab } from './components/Sidebar';
-import { NotificationDrawer } from './components/NotificationDrawer';
-import { CompassAgentModal } from './components/CompassAgentModal';
-import { CreateBookingModal } from './components/CreateBookingModal';
-import { LoginPage } from './pages/LoginPage';
-import { OperationsDashboard } from './pages/OperationsDashboard';
-import { CustomerDashboard } from './pages/CustomerDashboard';
-import { ShipmentsPage } from './pages/ShipmentsPage';
-import { ShipmentDetailPage } from './pages/ShipmentDetailPage';
-import { ScheduleLookupPage } from './pages/ScheduleLookupPage';
-import { CustomerTrackingPage } from './pages/CustomerTrackingPage';
-import { UserManagementPage } from './pages/UserManagementPage';
-import { PortsPage } from './pages/PortsPage';
-import { NotificationsPage } from './pages/NotificationsPage';
-import { localDb } from './services/storage';
-import { CompassLogo } from './components/CompassLogo';
-import {
-  LayoutDashboard,
-  Ship,
-  CalendarDays,
-  Search,
-  Bell,
-  Bot,
-} from 'lucide-react';
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-const MainApp: React.FC = () => {
-  const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
-  const [selectedShipmentId, setSelectedShipmentId] = useState<string | null>(null);
+import React, { useState } from 'react';
+import { LogisticsProvider, useLogistics } from './context/LogisticsContext';
+import { DisclaimerBanner } from './components/common/DisclaimerBanner';
+import { Navbar } from './components/common/Navbar';
+import { LoginView } from './components/auth/LoginView';
+import { OperationsDashboard } from './components/operations/OperationsDashboard';
+import { ScheduleLookup } from './components/operations/ScheduleLookup';
+import { CarrierComparison } from './components/operations/CarrierComparison';
+import { CustomerDashboard } from './components/customer/CustomerDashboard';
+import { ShipmentJourneyModal } from './components/journey/ShipmentJourneyModal';
+import { CompassAgentModal } from './components/agent/CompassAgentModal';
+import { NotificationDrawer } from './components/notifications/NotificationDrawer';
+import { NewBookingModal } from './components/operations/NewBookingModal';
+import { AddUserModal } from './components/operations/AddUserModal';
+import { ResetDataModal } from './components/common/ResetDataModal';
+import { Shipment } from './types/logistics';
 
-  // Modals
-  const [agentOpen, setAgentOpen] = useState(false);
+function MainApp() {
+  const { currentUser, customerShipment, resetDemoData } = useLogistics();
+
+  // Navigation tab state
+  const [activeTab, setActiveTab] = useState<string>(
+    currentUser.role === 'operations' ? 'overview' : 'my-shipment'
+  );
+
+  // Sync active tab whenever currentUser changes (e.g. on new login)
+  React.useEffect(() => {
+    setActiveTab(currentUser.role === 'operations' ? 'overview' : 'my-shipment');
+  }, [currentUser]);
+
+  // Authentication view toggle
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+
+  // Active Journey modal
+  const [journeyShipment, setJourneyShipment] = useState<Shipment | null>(null);
+
+  // Modals & Drawers
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [createBookingOpen, setCreateBookingOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [agentOpen, setAgentOpen] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [newBookingModalOpen, setNewBookingModalOpen] = useState(false);
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
 
-  // Read unread count from localDb whenever user changes
-  useEffect(() => {
-    if (user) {
-      try {
-        const { unread_count } = localDb.getNotifications(user.id);
-        setUnreadCount(unread_count);
-      } catch (e) {}
-    }
-  }, [user]);
+  // Pre-fill state for New Booking from Carrier Comparison
+  const [prefillBooking, setPrefillBooking] = useState<{
+    carrierId?: string;
+    pol?: string;
+    pod?: string;
+    vessel?: string;
+    voyage?: string;
+  }>({});
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#07111E] flex flex-col items-center justify-center text-white">
-        <div className="mb-4">
-          <CompassLogo size="lg" />
-        </div>
-        <h2 className="font-extrabold text-xl tracking-tight text-white">Compass Voyage</h2>
-        <p className="text-xs text-slate-400 mt-1 font-mono">Initializing Compass Logistics International...</p>
-      </div>
-    );
+  const handleOpenJourney = (shipment: Shipment) => {
+    setJourneyShipment(shipment);
+  };
+
+  const handleOpenNewBookingWithCarrier = (
+    carrierId: string,
+    pol: string,
+    pod: string,
+    vessel: string,
+    voyage: string
+  ) => {
+    setPrefillBooking({ carrierId, pol, pod, vessel, voyage });
+    setNewBookingModalOpen(true);
+  };
+
+  if (!isLoggedIn) {
+    return <LoginView onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
-
-  if (!user) {
-    return <LoginPage />;
-  }
-
-  const isOps = user.role === 'operations';
-
-  const handleSelectShipment = (id: string) => {
-    setSelectedShipmentId(id);
-  };
-
-  const handleBackToShipments = () => {
-    setSelectedShipmentId(null);
-  };
-
-  const handleTabChange = (tab: NavTab) => {
-    setSelectedShipmentId(null);
-    setActiveTab(tab);
-  };
 
   return (
-    <div className="min-h-screen bg-[#07111E] flex flex-col font-sans text-slate-100 selection:bg-[#B7F500] selection:text-[#0D2240]">
-      {/* Top Header Navbar */}
+    <div className="min-h-screen bg-[#0D2240] flex flex-col text-slate-100 font-sans antialiased selection:bg-[#B7F500] selection:text-[#0D2240]">
+      
+      {/* 1. Security & POC Notice Banner */}
+      <DisclaimerBanner />
+
+      {/* 2. Top Bar Navigation adhering to 3-zone contract */}
       <Navbar
-        onOpenAgent={() => setAgentOpen(true)}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         onOpenNotifications={() => setNotificationsOpen(true)}
-        unreadNotificationsCount={unreadCount}
+        onOpenAgent={() => setAgentOpen(true)}
+        onOpenResetModal={() => setResetModalOpen(true)}
+        onLogout={() => setIsLoggedIn(false)}
       />
 
-      {/* Main Body with Sidebar + Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Dark Navy Sidebar */}
-        <Sidebar
-          activeTab={activeTab}
-          onSelectTab={handleTabChange}
-          onOpenAgent={() => setAgentOpen(true)}
-          unreadCount={unreadCount}
-        />
+      {/* 3. Main Dynamic Content Viewport */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        
+        {currentUser.role === 'operations' ? (
+          <>
+            {activeTab === 'overview' && (
+              <OperationsDashboard
+                onSelectShipmentJourney={handleOpenJourney}
+                onNavigateTab={setActiveTab}
+                onOpenNewBookingModal={() => {
+                  setPrefillBooking({});
+                  setNewBookingModalOpen(true);
+                }}
+                onOpenAddUserModal={() => setAddUserModalOpen(true)}
+              />
+            )}
 
-        {/* Dynamic Content Area with consistent dark navy theme matching Login page */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#081426] pb-24 md:pb-8">
-          <div className="max-w-7xl mx-auto">
-            {selectedShipmentId ? (
-              <ShipmentDetailPage
-                shipmentId={selectedShipmentId}
-                onBack={handleBackToShipments}
-              />
-            ) : activeTab === 'dashboard' ? (
-              isOps ? (
-                <OperationsDashboard
-                  onSelectShipment={handleSelectShipment}
-                  onNavigateToTab={handleTabChange}
-                  onOpenCreateBooking={() => setCreateBookingOpen(true)}
-                  onOpenCreateCustomer={() => handleTabChange('users')}
-                />
-              ) : (
-                <CustomerDashboard
-                  onSelectShipment={handleSelectShipment}
-                  onNavigateToTab={handleTabChange}
-                  onOpenAgent={() => setAgentOpen(true)}
-                />
-              )
-            ) : activeTab === 'shipments' ? (
-              <ShipmentsPage
-                onSelectShipment={handleSelectShipment}
-                onOpenCreateBooking={isOps ? () => setCreateBookingOpen(true) : undefined}
-              />
-            ) : activeTab === 'schedules' ? (
-              <ScheduleLookupPage onSelectShipment={handleSelectShipment} />
-            ) : activeTab === 'tracking' ? (
-              <CustomerTrackingPage onSelectShipment={handleSelectShipment} />
-            ) : activeTab === 'users' ? (
-              <UserManagementPage onSelectShipment={handleSelectShipment} />
-            ) : activeTab === 'ports' ? (
-              <PortsPage />
-            ) : activeTab === 'notifications' ? (
-              <NotificationsPage
-                onSelectShipment={handleSelectShipment}
-                onUnreadChange={setUnreadCount}
-              />
-            ) : null}
-          </div>
-        </main>
-      </div>
+            {activeTab === 'schedule-lookup' && (
+              <ScheduleLookup onSelectShipmentJourney={handleOpenJourney} />
+            )}
 
-      {/* Mobile Responsive Bottom Tab Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#0D2240] border-t border-slate-800 flex items-center justify-around z-40 px-2 text-[10px]">
-        <button
-          onClick={() => handleTabChange('dashboard')}
-          className={`flex flex-col items-center gap-1 p-1 ${
-            activeTab === 'dashboard' && !selectedShipmentId ? 'text-[#B7F500]' : 'text-slate-400'
-          }`}
-        >
-          <LayoutDashboard className="w-4 h-4" />
-          <span>Dashboard</span>
-        </button>
-        <button
-          onClick={() => handleTabChange('shipments')}
-          className={`flex flex-col items-center gap-1 p-1 ${
-            activeTab === 'shipments' && !selectedShipmentId ? 'text-[#B7F500]' : 'text-slate-400'
-          }`}
-        >
-          <Ship className="w-4 h-4" />
-          <span>Shipments</span>
-        </button>
-        {isOps ? (
-          <button
-            onClick={() => handleTabChange('schedules')}
-            className={`flex flex-col items-center gap-1 p-1 ${
-              activeTab === 'schedules' ? 'text-[#B7F500]' : 'text-slate-400'
-            }`}
-          >
-            <CalendarDays className="w-4 h-4" />
-            <span>Schedules</span>
-          </button>
+            {activeTab === 'carrier-comparison' && (
+              <CarrierComparison
+                onOpenNewBookingWithCarrier={handleOpenNewBookingWithCarrier}
+              />
+            )}
+          </>
         ) : (
-          <button
-            onClick={() => handleTabChange('tracking')}
-            className={`flex flex-col items-center gap-1 p-1 ${
-              activeTab === 'tracking' ? 'text-[#B7F500]' : 'text-slate-400'
-            }`}
-          >
-            <Search className="w-4 h-4" />
-            <span>Track</span>
-          </button>
-        )}
-        <button
-          onClick={() => setAgentOpen(true)}
-          className="flex flex-col items-center gap-1 p-1 text-[#B7F500]"
-        >
-          <Bot className="w-4 h-4" />
-          <span>Agent</span>
-        </button>
-        <button
-          onClick={() => handleTabChange('notifications')}
-          className={`relative flex flex-col items-center gap-1 p-1 ${
-            activeTab === 'notifications' ? 'text-[#B7F500]' : 'text-slate-400'
-          }`}
-        >
-          <Bell className="w-4 h-4" />
-          {unreadCount > 0 && (
-            <span className="absolute top-0 right-1 w-2 h-2 rounded-full bg-rose-500" />
-          )}
-          <span>Alerts</span>
-        </button>
-      </nav>
+          /* Customer Portal: Strictly Scoped */
+          <>
+            {activeTab === 'my-shipment' && (
+              <CustomerDashboard
+                onSelectShipmentJourney={handleOpenJourney}
+                onOpenAgent={() => setAgentOpen(true)}
+              />
+            )}
 
-      {/* Floating Compass Agent Modal */}
+            {activeTab === 'my-milestones' && customerShipment && (
+              <div className="space-y-4">
+                <button
+                  onClick={() => setActiveTab('my-shipment')}
+                  className="text-xs font-semibold text-[#B7F500] hover:underline flex items-center gap-1"
+                >
+                  ← Back to Shipment Overview
+                </button>
+                <div className="bg-[#132B4F] rounded-2xl border border-slate-700/70 p-6 shadow-sm">
+                  <CustomerDashboard
+                    onSelectShipmentJourney={handleOpenJourney}
+                    onOpenAgent={() => setAgentOpen(true)}
+                  />
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+      </main>
+
+      {/* 4. Global Modals & Drawers */}
+      
+      {/* Shipment Journey Timeline Modal */}
+      {journeyShipment && (
+        <ShipmentJourneyModal
+          shipment={journeyShipment}
+          onClose={() => setJourneyShipment(null)}
+        />
+      )}
+
+      {/* Compass Agent Modal */}
       <CompassAgentModal
         isOpen={agentOpen}
         onClose={() => setAgentOpen(false)}
-        onSelectShipment={handleSelectShipment}
+        onSelectShipment={handleOpenJourney}
       />
 
-      {/* Slide-over Notifications Drawer */}
+      {/* Notification Drawer */}
       <NotificationDrawer
         isOpen={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
-        onSelectShipment={handleSelectShipment}
-        onUnreadChange={setUnreadCount}
+        onSelectShipment={handleOpenJourney}
       />
 
-      {/* Create Booking Modal for Operations */}
-      <CreateBookingModal
-        isOpen={createBookingOpen}
-        onClose={() => setCreateBookingOpen(false)}
-        onSuccess={(id) => {
-          setSelectedShipmentId(id);
-        }}
+      {/* Operations New Booking Modal */}
+      <NewBookingModal
+        isOpen={newBookingModalOpen}
+        onClose={() => setNewBookingModalOpen(false)}
+        initialCarrierId={prefillBooking.carrierId}
+        initialPol={prefillBooking.pol}
+        initialPod={prefillBooking.pod}
+        initialVessel={prefillBooking.vessel}
+        initialVoyage={prefillBooking.voyage}
       />
+
+      {/* Operations Add Customer User Modal */}
+      <AddUserModal
+        isOpen={addUserModalOpen}
+        onClose={() => setAddUserModalOpen(false)}
+      />
+
+      {/* Reset Demo Data Modal */}
+      <ResetDataModal
+        isOpen={resetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+        onConfirmReset={resetDemoData}
+      />
+
+      {/* Footer */}
+      <footer className="bg-[#09172A] border-t border-slate-800 py-6 text-center text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p>© 2026 Compass Logistics International. Compass Voyage™ Visibility System.</p>
+          <div className="flex items-center gap-4 text-slate-400">
+            <span>Primary Navy #0D2240</span>
+            <span>·</span>
+            <span>Neon Green #B7F500</span>
+            <span>·</span>
+            <button
+              onClick={() => setResetModalOpen(true)}
+              className="hover:text-rose-400 transition-colors"
+            >
+              Reset Demo Records
+            </button>
+          </div>
+        </div>
+      </footer>
+
     </div>
   );
-};
+}
 
 export default function App() {
   return (
-    <AuthProvider>
+    <LogisticsProvider>
       <MainApp />
-    </AuthProvider>
+    </LogisticsProvider>
   );
 }

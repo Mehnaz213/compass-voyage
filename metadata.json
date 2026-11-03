@@ -1,6 +1,6 @@
 {
   "name": "Compass Voyage",
-  "description": "Enterprise logistics management and shipment tracking platform for Compass Logistics International.",
+  "description": "Logistics shipment visibility and transportation schedule management platform for Compass Logistics International.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

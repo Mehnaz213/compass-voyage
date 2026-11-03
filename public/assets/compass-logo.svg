@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" width="360" height="240">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#004D27" />
+      <stop offset="60%" stop-color="#003B1E" />
+      <stop offset="100%" stop-color="#002914" />
+    </radialGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#AEEA00" />
+      <stop offset="50%" stop-color="#C6EF00" />
+      <stop offset="100%" stop-color="#DCF700" />
+    </linearGradient>
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background card matching uploaded image -->
+  <rect width="360" height="240" rx="8" fill="url(#bgGrad)" />
+
+  <!-- Stylized 5-feather wing / fan symbol -->
+  <g transform="translate(180, 82)">
+    <!-- Feather 1 (leftmost) -->
+    <path d="M -15,48 C -22,46 -28,32 -25,12 C -23,-2 -17,-18 -10,-24 C -5,-28 -2,-26 -3,-18 C -5,-8 -9,12 -8,46 Z" fill="url(#leafGrad)" />
+    <!-- Feather 2 -->
+    <path d="M -7,49 C -11,46 -13,26 -9,0 C -6,-18 2,-36 9,-43 C 14,-47 16,-44 14,-36 C 10,-22 4,14 1,49 Z" fill="url(#leafGrad)" />
+    <!-- Feather 3 (central) -->
+    <path d="M 1,49 C 0,38 3,18 9,-8 C 14,-28 25,-48 34,-54 C 39,-57 41,-53 38,-44 C 31,-24 18,18 11,49 Z" fill="url(#leafGrad)" />
+    <!-- Feather 4 -->
+    <path d="M 11,49 C 13,38 18,18 29,-10 C 37,-30 52,-48 64,-50 C 69,-51 70,-46 64,-37 C 50,-16 34,18 23,49 Z" fill="url(#leafGrad)" />
+    <!-- Feather 5 (arching wing tip) -->
+    <path d="M 23,49 C 27,35 39,12 56,-8 C 70,-24 88,-34 102,-31 C 112,-29 114,-22 103,-11 C 88,4 66,28 44,46 C 36,52 28,52 23,49 Z" fill="url(#leafGrad)" />
+
+    <!-- Delicate rib lines between feathers -->
+    <path d="M -16,42 C -17,25 -14,6 -7,-18" stroke="#003518" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.65" />
+    <path d="M -6,45 C -7,28 -3,4 7,-36" stroke="#003518" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.65" />
+    <path d="M 4,46 C 7,26 15,-4 32,-46" stroke="#003518" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.65" />
+    <path d="M 16,46 C 21,26 34,-6 58,-40" stroke="#003518" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.65" />
+  </g>
+
+  <!-- COMPASS Wordmark -->
+  <text x="180" y="174" 
+        text-anchor="middle" 
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+        font-size="37" 
+        font-weight="900" 
+        letter-spacing="2.5" 
+        fill="#FFFFFF">COMPASS</text>
+
+  <!-- LOGISTICS INTERNATIONAL Subtitle -->
+  <text x="180" y="199" 
+        text-anchor="middle" 
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+        font-size="12" 
+        font-weight="600" 
+        letter-spacing="4.8" 
+        fill="#FFFFFF">LOGISTICS INTERNATIONAL</text>
+</svg>
